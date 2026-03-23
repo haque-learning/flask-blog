@@ -1,12 +1,14 @@
 [phases.setup]
 nixPkgs = ["postgresql", "postgresql.lib"]
 
-[build.env]
-LD_LIBRARY_PATH = "/nix/store/*postgresql-*/lib"
-PYTHONPATH = "/app/.venv/lib/python3.13/site-packages"
-
 [phases.install]
-cmds = ["pip install --no-cache-dir -r requirements.txt"]
+cmds = [
+  "pip install --upgrade pip",
+  "pip install --no-cache-dir -r requirements.txt"
+]
 
 [phases.start]
-cmd = "gunicorn app:app"
+cmd = "gunicorn run:app"
+
+[build.env]
+LD_LIBRARY_PATH = "/nix/store/*postgresql-*/lib"
