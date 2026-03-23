@@ -1,0 +1,561 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} - Nazrul's Blog{% endblock %}
+
+{% block content %}
+    <article class="blog-post">
+        <!-- Post Header -->
+        <div class="mb-4">
+            <h1 class="mb-3">{{ post.title }}</h1>
+            <div class="text-muted">
+                <i class="bi bi-person"></i> 
+                {% if post.author_user %}
+                    <a href="/user/{{ post.author_user.username }}" class="text-decoration-none fw-bold">
+                        {{ post.author_user.username }}
+                    </a>
+                {% else %}
+                    {{ post.author }}
+                {% endif %}
+                <span class="mx-2">|</span>
+                <i class="bi bi-calendar"></i> {{ post.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                <span class="mx-2">|</span>
+                <i class="bi bi-chat-left-text"></i> {{ comment_count }} comment{% if comment_count != 1 %}s{% endif %}
+            </div>
+        </div>
+
+        <!-- Post Content -->
+        <div class="card">
+            <div class="card-body">
+                <div class="post-content">
+                    {{ post.content }}
+                </div>
+            </div>
+            
+            <!-- Like Section with Tooltip -->
+            <div class="card-footer bg-white border-top">
+                <div class="d-flex align-items-center">
+                    {% if current_user.is_authenticated %}
+                        <button class="btn btn-sm like-btn {% if post.is_liked_by(current_user) %}btn-danger{% else %}btn-outline-danger{% endif %}"
+                                data-post-id="{{ post.id }}"
+                                data-type="post"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                data-bs-html="true"
+                                title="{% if post.get_like_count() > 0 %}Liked by: {{ post.get_likers()|map(attribute='username')|join(', ') }}{% else %}Be the first to like{% endif %}">
+                            <i class="bi bi-heart{% if post.is_liked_by(current_user) %}-fill{% endif %}"></i>
+                            <span class="like-count">{{ post.get_like_count() }}</span>
+                        </button>
+                    {% else %}
+                        <span class="text-muted"
+                              {% if post.get_like_count() > 0 %}
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top"
+                              data-bs-html="true"
+                              title="Liked by: {{ post.get_likers()|map(attribute='username')|join(', ') }}"
+                              {% endif %}>
+                            <i class="bi bi-heart"></i> {{ post.get_like_count() }}
+                        </span>
+                    {% endif %}
+                    <small class="text-muted ms-2">
+                        {% if post.get_like_count() == 1 %}
+                            1 person likes this
+                        {% elif post.get_like_count() > 1 %}
+                            {{ post.get_like_count() }} people like this
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-4 d-flex gap-2">
+            <a href="/post" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to All Posts
+            </a>
+            
+            {% if current_user.is_authenticated and (post.user_id == current_user.id or current_user.is_admin) %}
+                <a href="/post/{{ post.id }}/edit" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i> Edit Post
+                </a>
+                
+                <!-- DELETE POST FORM - CSRF TOKEN ADDED -->
+                <form method="POST" action="/post/{{ post.id }}/delete" style="display: inline;" 
+                      onsubmit="return confirm('Are you sure you want to delete this post?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Delete Post
+                    </button>
+                </form>
+                
+                {% if current_user.is_admin %}
+                    <span class="badge bg-warning text-dark ms-2">
+                        <i class="bi bi-shield"></i> Admin Access
+                    </span>
+                {% endif %}
+            {% endif %}
+        </div>
+    </article>
+
+    <hr class="my-5">
+
+    <!-- Comments Section -->
+    <div class="comments-section">
+        <h3 class="mb-4">
+            <i class="bi bi-chat-left-text"></i> Comments 
+            <span class="badge bg-primary">{{ comment_count }}</span>
+        </h3>
+
+        {% if current_user.is_authenticated %}
+            <!-- Add Comment Form - CSRF TOKEN ADDED -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-start mb-3">
+                        <img src="{{ current_user.get_profile_image() }}" 
+                             alt="{{ current_user.username }}" 
+                             class="rounded-circle me-3"
+                             style="width: 48px; height: 48px;">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-2">Add a Comment</h6>
+                            <form method="POST" action="/post/{{ post.id }}/comment" class="comment-form">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="parent_id" value="">
+                                <div class="mb-3">
+                                    <textarea class="form-control" 
+                                              name="content" 
+                                              id="main-comment-textarea"
+                                              rows="3" 
+                                              placeholder="Share your thoughts..."
+                                              required
+                                              maxlength="1000"></textarea>
+                                    <div class="form-text">Maximum 1000 characters</div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <span id="comment-char-count">0</span>/1000 characters
+                                    </small>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-send"></i> Post Comment
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Not logged in message -->
+            <div class="alert alert-info mb-4">
+                <i class="bi bi-info-circle"></i> 
+                <a href="/login" class="alert-link">Login</a> or 
+                <a href="/register" class="alert-link">Register</a> to join the conversation!
+            </div>
+        {% endif %}
+
+        <!-- Display Comments -->
+        {% if comments %}
+            <div class="comment-list">
+                {% for comment in comments %}
+                    <div class="card mb-3 comment-card">
+                        <div class="card-body">
+                            <!-- Comment Header -->
+                            <div class="d-flex align-items-start mb-3">
+                                <img src="{{ comment.author.get_profile_image() }}" 
+                                     alt="{{ comment.author.username }}" 
+                                     class="rounded-circle me-3"
+                                     style="width: 48px; height: 48px;">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <a href="/user/{{ comment.author.username }}" 
+                                               class="fw-bold text-decoration-none">
+                                                {{ comment.author.username }}
+                                            </a>
+                                            {% if comment.author.is_admin %}
+                                                <span class="badge bg-warning text-dark ms-1">Admin</span>
+                                            {% endif %}
+                                            <br>
+                                            <small class="text-muted">
+                                                <i class="bi bi-clock"></i> 
+                                                {{ comment.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                                {% if comment.edited_at %}
+                                                    <span class="badge bg-secondary ms-1">Edited</span>
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        
+                                        <!-- Comment Actions (Edit/Delete) -->
+                                        {% if current_user.is_authenticated and (current_user.id == comment.user_id or current_user.is_admin) %}
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="/comment/{{ comment.id }}/edit" 
+                                                   class="btn btn-outline-secondary btn-sm"
+                                                   title="Edit comment">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <!-- DELETE COMMENT FORM - CSRF TOKEN ADDED -->
+                                                <form method="POST" 
+                                                      action="/comment/{{ comment.id }}/delete" 
+                                                      style="display: inline;"
+                                                      onsubmit="return confirm('Delete this comment?\n\nThis will also delete all replies. This action cannot be undone.');">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                    <button type="submit" 
+                                                            class="btn btn-outline-danger btn-sm"
+                                                            title="Delete comment">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Comment Content -->
+                            <div class="comment-content ms-5">
+                                <p class="mb-2">{{ comment.content }}</p>
+                                
+                                <!-- Like and Reply Buttons with Tooltip -->
+                                <div class="d-flex gap-2 align-items-center">
+                                    {% if current_user.is_authenticated %}
+                                        <button class="btn btn-sm like-btn {% if comment.is_liked_by(current_user) %}btn-danger{% else %}btn-outline-danger{% endif %}"
+                                                data-comment-id="{{ comment.id }}"
+                                                data-type="comment"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                data-bs-html="true"
+                                                title="{% if comment.get_like_count() > 0 %}Liked by: {{ comment.get_likers()|map(attribute='username')|join(', ') }}{% else %}Be the first to like{% endif %}">
+                                            <i class="bi bi-heart{% if comment.is_liked_by(current_user) %}-fill{% endif %}"></i>
+                                            <span class="like-count">{{ comment.get_like_count() }}</span>
+                                        </button>
+                                        
+                                        <button class="btn btn-sm btn-outline-primary reply-btn" 
+                                                data-comment-id="{{ comment.id }}"
+                                                data-author="{{ comment.author.username }}">
+                                            <i class="bi bi-reply"></i> Reply
+                                        </button>
+                                    {% else %}
+                                        <span class="text-muted small"
+                                              {% if comment.get_like_count() > 0 %}
+                                              data-bs-toggle="tooltip"
+                                              data-bs-placement="top"
+                                              data-bs-html="true"
+                                              title="Liked by: {{ comment.get_likers()|map(attribute='username')|join(', ') }}"
+                                              {% endif %}>
+                                            <i class="bi bi-heart"></i> {{ comment.get_like_count() }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Reply Form (Hidden by default) - CSRF TOKEN ADDED -->
+                                <div id="reply-form-{{ comment.id }}" class="mt-3" style="display: none;">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-start">
+                                                {% if current_user.is_authenticated %}
+                                                <img src="{{ current_user.get_profile_image() }}" 
+                                                     alt="{{ current_user.username }}" 
+                                                     class="rounded-circle me-2"
+                                                     style="width: 32px; height: 32px;">
+                                                {% endif %}
+                                                <div class="flex-grow-1">
+                                                    <small class="text-muted mb-2 d-block">
+                                                        Replying to <strong>{{ comment.author.username }}</strong>
+                                                    </small>
+                                                    <form method="POST" action="/post/{{ post.id }}/comment">
+                                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                        <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                                                        <div class="mb-2">
+                                                            <textarea class="form-control form-control-sm" 
+                                                                      name="content" 
+                                                                      rows="2" 
+                                                                      placeholder="Write your reply..."
+                                                                      required
+                                                                      maxlength="1000"></textarea>
+                                                        </div>
+                                                        <div class="d-flex gap-2">
+                                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                                <i class="bi bi-send"></i> Reply
+                                                            </button>
+                                                            <button type="button" 
+                                                                    class="btn btn-secondary btn-sm cancel-reply-btn"
+                                                                    data-comment-id="{{ comment.id }}">
+                                                                Cancel
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Replies (Nested Comments) -->
+                            {% if comment.replies.count() > 0 %}
+                                <div class="replies ms-5 mt-3">
+                                    {% for reply in comment.replies.order_by('created_at') %}
+                                        <div class="card mb-2 bg-light">
+                                            <div class="card-body py-2">
+                                                <div class="d-flex align-items-start">
+                                                    <img src="{{ reply.author.get_profile_image() }}" 
+                                                         alt="{{ reply.author.username }}" 
+                                                         class="rounded-circle me-2"
+                                                         style="width: 32px; height: 32px;">
+                                                    <div class="flex-grow-1">
+                                                        <div class="d-flex justify-content-between">
+                                                            <div>
+                                                                <a href="/user/{{ reply.author.username }}" 
+                                                                   class="fw-bold text-decoration-none small">
+                                                                    {{ reply.author.username }}
+                                                                </a>
+                                                                {% if reply.author.is_admin %}
+                                                                    <span class="badge bg-warning text-dark" style="font-size: 0.6rem;">Admin</span>
+                                                                {% endif %}
+                                                                <br>
+                                                                <small class="text-muted" style="font-size: 0.75rem;">
+                                                                    <i class="bi bi-clock"></i>
+                                                                    {{ reply.created_at.strftime('%b %d at %I:%M %p') }}
+                                                                    {% if reply.edited_at %}
+                                                                        <span class="badge bg-secondary" style="font-size: 0.5rem;">Edited</span>
+                                                                    {% endif %}
+                                                                </small>
+                                                            </div>
+                                                            
+                                                            {% if current_user.is_authenticated and (current_user.id == reply.user_id or current_user.is_admin) %}
+                                                                <div class="btn-group btn-group-sm">
+                                                                    <a href="/comment/{{ reply.id }}/edit" 
+                                                                       class="btn btn-outline-secondary btn-sm" 
+                                                                       style="font-size: 0.7rem;"
+                                                                       title="Edit reply">
+                                                                        <i class="bi bi-pencil"></i>
+                                                                    </a>
+                                                                    <!-- DELETE REPLY FORM - CSRF TOKEN ADDED -->
+                                                                    <form method="POST" 
+                                                                          action="/comment/{{ reply.id }}/delete" 
+                                                                          style="display: inline;"
+                                                                          onsubmit="return confirm('Delete this reply?\n\nThis action cannot be undone.');">
+                                                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                                        <button type="submit" 
+                                                                                class="btn btn-outline-danger btn-sm" 
+                                                                                style="font-size: 0.7rem;"
+                                                                                title="Delete reply">
+                                                                            <i class="bi bi-trash"></i>
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            {% endif %}
+                                                        </div>
+                                                        <p class="mb-1 mt-1 small">{{ reply.content }}</p>
+                                                        
+                                                        <!-- Like button for replies with tooltip -->
+                                                        {% if current_user.is_authenticated %}
+                                                            <button class="btn btn-sm like-btn {% if reply.is_liked_by(current_user) %}btn-danger{% else %}btn-outline-danger{% endif %}"
+                                                                    data-comment-id="{{ reply.id }}"
+                                                                    data-type="comment"
+                                                                    data-bs-toggle="tooltip"
+                                                                    data-bs-placement="top"
+                                                                    data-bs-html="true"
+                                                                    title="{% if reply.get_like_count() > 0 %}Liked by: {{ reply.get_likers()|map(attribute='username')|join(', ') }}{% else %}Be the first to like{% endif %}"
+                                                                    style="font-size: 0.7rem; padding: 2px 8px;">
+                                                                <i class="bi bi-heart{% if reply.is_liked_by(current_user) %}-fill{% endif %}"></i>
+                                                                <span class="like-count">{{ reply.get_like_count() }}</span>
+                                                            </button>
+                                                        {% else %}
+                                                            <span class="text-muted" style="font-size: 0.75rem;"
+                                                                  {% if reply.get_like_count() > 0 %}
+                                                                  data-bs-toggle="tooltip"
+                                                                  data-bs-placement="top"
+                                                                  data-bs-html="true"
+                                                                  title="Liked by: {{ reply.get_likers()|map(attribute='username')|join(', ') }}"
+                                                                  {% endif %}>
+                                                                <i class="bi bi-heart"></i> {{ reply.get_like_count() }}
+                                                            </span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- No comments yet -->
+            <div class="text-center py-5">
+                <i class="bi bi-chat" style="font-size: 4rem; color: #dee2e6;"></i>
+                <h5 class="text-muted mt-3">No comments yet</h5>
+                <p class="text-muted">Be the first to share your thoughts!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- JavaScript for Comment and Like Features -->
+    <script>
+        // Initialize Bootstrap tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTooltips();
+        });
+        
+        function initializeTooltips() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+        
+        // Character counter for main comment form
+        const commentTextarea = document.getElementById('main-comment-textarea');
+        const charCount = document.getElementById('comment-char-count');
+        
+        if (commentTextarea && charCount) {
+            commentTextarea.addEventListener('input', function() {
+                charCount.textContent = this.value.length;
+                
+                // Change color based on length
+                if (this.value.length > 900) {
+                    charCount.classList.add('text-danger');
+                    charCount.classList.remove('text-warning');
+                } else if (this.value.length > 800) {
+                    charCount.classList.add('text-warning');
+                    charCount.classList.remove('text-danger');
+                } else {
+                    charCount.classList.remove('text-warning', 'text-danger');
+                }
+            });
+        }
+        
+        // Event delegation for buttons
+        document.addEventListener('click', function(e) {
+            // Handle Reply button clicks
+            if (e.target.classList.contains('reply-btn') || e.target.closest('.reply-btn')) {
+                const button = e.target.classList.contains('reply-btn') ? e.target : e.target.closest('.reply-btn');
+                const commentId = button.getAttribute('data-comment-id');
+                
+                // Hide all reply forms first
+                document.querySelectorAll('[id^="reply-form-"]').forEach(form => {
+                    form.style.display = 'none';
+                });
+                
+                // Show this reply form
+                const replyForm = document.getElementById('reply-form-' + commentId);
+                if (replyForm) {
+                    replyForm.style.display = 'block';
+                    const textarea = replyForm.querySelector('textarea');
+                    if (textarea) {
+                        textarea.focus();
+                    }
+                }
+            }
+            
+            // Handle Cancel button clicks
+            if (e.target.classList.contains('cancel-reply-btn') || e.target.closest('.cancel-reply-btn')) {
+                const button = e.target.classList.contains('cancel-reply-btn') ? e.target : e.target.closest('.cancel-reply-btn');
+                const commentId = button.getAttribute('data-comment-id');
+                
+                const replyForm = document.getElementById('reply-form-' + commentId);
+                if (replyForm) {
+                    replyForm.style.display = 'none';
+                    const textarea = replyForm.querySelector('textarea');
+                    if (textarea) {
+                        textarea.value = '';
+                    }
+                }
+            }
+            
+            // Handle Like button clicks with animation
+            if (e.target.closest('.like-btn')) {
+                const button = e.target.closest('.like-btn');
+                const postId = button.getAttribute('data-post-id');
+                const commentId = button.getAttribute('data-comment-id');
+                const type = button.getAttribute('data-type');
+                
+                let url = '';
+                if (type === 'post') {
+                    url = `/post/${postId}/like`;
+                } else if (type === 'comment') {
+                    url = `/comment/${commentId}/like`;
+                }
+                
+                // Send like request with CSRF token
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Update button appearance
+                    const icon = button.querySelector('i');
+                    const countSpan = button.querySelector('.like-count');
+                    
+                    if (data.liked) {
+                        // Liked - Add animation
+                        button.classList.remove('btn-outline-danger');
+                        button.classList.add('btn-danger');
+                        icon.classList.remove('bi-heart');
+                        icon.classList.add('bi-heart-fill');
+                        
+                        // Add burst animation
+                        button.classList.add('liked-animation');
+                        setTimeout(() => {
+                            button.classList.remove('liked-animation');
+                        }, 500);
+                        
+                        // Create floating heart
+                        createFloatingHeart(button);
+                    } else {
+                        // Unliked
+                        button.classList.remove('btn-danger');
+                        button.classList.add('btn-outline-danger');
+                        icon.classList.remove('bi-heart-fill');
+                        icon.classList.add('bi-heart');
+                    }
+                    
+                    // Update count
+                    countSpan.textContent = data.count;
+                    
+                    // Dispose and reinitialize tooltip
+                    const tooltip = bootstrap.Tooltip.getInstance(button);
+                    if (tooltip) {
+                        tooltip.dispose();
+                    }
+                    
+                    // Reinitialize all tooltips after a short delay
+                    setTimeout(initializeTooltips, 100);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to process like. Please try again.');
+                });
+            }
+        });
+        
+        // Function to create floating heart animation
+        function createFloatingHeart(button) {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.innerHTML = '<i class="bi bi-heart-fill"></i>';
+            
+            // Position at button location
+            const rect = button.getBoundingClientRect();
+            heart.style.left = rect.left + rect.width / 2 - 16 + 'px';
+            heart.style.top = rect.top + 'px';
+            
+            document.body.appendChild(heart);
+            
+            // Trigger animation
+            setTimeout(() => {
+                heart.style.opacity = '1';
+            }, 10);
+            
+            // Remove after animation completes
+            setTimeout(() => {
+                heart.remove();
+            }, 2000);
+        }
+    </script>
+{% endblock %}

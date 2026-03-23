@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}About - Nazrul's Blog{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-4 text-center">
+        <img src="{{ url_for('static', filename='images/home.jpg') }}" 
+             class="img-fluid rounded-circle" 
+             alt="Nazrul Haque"
+             style="max-width: 200px;">
+    </div>
+        <div class="col-md-8 mx-auto">
+            <h2 class="mb-4">About {{ author }}</h2>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Profile Information</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>Name:</strong> {{ author }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Email:</strong> {{ email }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Age:</strong> {{ age }} years old
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <h4>About This Blog</h4>
+                <p class="lead">Welcome to my blog where I share my journey learning Flask and web development!</p>
+                <p>I'm passionate about coding and love sharing what I learn with others. Follow along as I document my progress and share tips and tricks.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

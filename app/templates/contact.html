@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Contact - Nazrul's Blog{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <h2 class="mb-4">Get in Touch</h2>
+            <p class="lead">Have a question or want to work together? I'd love to hear from you!</p>
+            
+            <!-- Contact Form -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Send Me a Message</h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Your Name</label>
+                            <input type="text" class="form-control" id="name" placeholder="Enter your name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" placeholder="your.email@example.com" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="subject" placeholder="What's this about?" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" rows="5" placeholder="Your message here..." required></textarea>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> <strong>Note:</strong> This form doesn't send emails yet. We'll add that functionality in Week 5!
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Contact Information -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="bi bi-envelope-fill" style="font-size: 2rem; color: #007bff;"></i>
+                            </div>
+                            <h5 class="card-title">Email</h5>
+                            <p class="card-text">6hZlO@example.com</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="bi bi-person-fill" style="font-size: 2rem; color: #007bff;"></i>
+                            </div>
+                            <h5 class="card-title">Name</h5>
+                            <p class="card-text">Nazrul Haque</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Social Links (Optional) -->
+            <div class="card mt-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Connect With Me</h5>
+                    <div class="d-flex justify-content-center gap-3 mt-3">
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="bi bi-twitter"></i> Twitter
+                        </a>
+                        <a href="#" class="btn btn-outline-dark">
+                            <i class="bi bi-github"></i> GitHub
+                        </a>
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="bi bi-linkedin"></i> LinkedIn
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

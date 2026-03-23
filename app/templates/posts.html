@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}All Posts - Nazrul's Blog{% endblock %}
+
+{% block content %}
+    <!-- Page Header with Filter Tabs -->
+    <div class="text-center mb-4">
+        <h1 class="display-4 mb-3">
+            <i class="bi bi-newspaper"></i> All Posts
+        </h1>
+        
+        <!-- Filter Tabs -->
+        <ul class="nav nav-pills justify-content-center mb-4">
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/post' %}active{% endif %}" href="/post">
+                    <i class="bi bi-clock-history"></i> Recent
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/post/popular' %}active{% endif %}" href="/post/popular">
+                    <i class="bi bi-fire"></i> Popular
+                </a>
+            </li>
+        </ul>
+        
+        {% if pagination %}
+            <p class="lead text-muted">
+                Showing {{ posts|length }} of {{ pagination.total }} post{% if pagination.total != 1 %}s{% endif %}
+                <span class="badge bg-secondary">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+            </p>
+        {% else %}
+            <p class="lead text-muted">
+                {% if posts %}
+                    Showing {{ posts|length }} post{% if posts|length != 1 %}s{% endif %}
+                {% else %}
+                    No posts yet
+                {% endif %}
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Posts Grid -->
+    {% if posts %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+            {% for post in posts %}
+                <div class="col">
+                    <div class="card h-100 post-card">
+                        <div class="card-body d-flex flex-column">
+                            <!-- Post Title -->
+                            <h5 class="card-title mb-3">
+                                <a href="/post/{{ post.id }}" class="text-decoration-none text-dark">
+                                    {{ post.title }}
+                                </a>
+                            </h5>
+
+                            <!-- Post Excerpt -->
+                            <p class="card-text text-muted mb-3">
+                                {{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}
+                            </p>
+
+                            <!-- Post Footer -->
+                            <div class="mt-auto pt-3 border-top">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <!-- Author -->
+                                    <div class="d-flex align-items-center">
+                                        {% if post.author_user %}
+                                            <img src="{{ post.author_user.get_profile_image() }}" 
+                                                 alt="{{ post.author_user.username }}" 
+                                                 class="rounded-circle me-2"
+                                                 style="width: 32px; height: 32px;">
+                                            <div>
+                                                <a href="/user/{{ post.author_user.username }}" 
+                                                   class="text-decoration-none fw-bold small">
+                                                    {{ post.author_user.username }}
+                                                </a>
+                                            </div>
+                                        {% else %}
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-person-circle me-2" style="font-size: 32px;"></i>
+                                                <span class="fw-bold small">{{ post.author }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Date -->
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar3"></i>
+                                        {{ post.created_at.strftime('%b %d') }}
+                                    </small>
+                                </div>
+                                
+                                <!-- Engagement Stats (Likes & Comments) -->
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-heart-fill text-danger"></i> 
+                                        {{ post.get_like_count() }}
+                                        <span class="mx-1">·</span>
+                                        <i class="bi bi-chat-left-text text-primary"></i> 
+                                        {{ post.get_comment_count() }}
+                                    </small>
+                                </div>
+                                
+                                <!-- Read More Link -->
+                                <a href="/post/{{ post.id }}" class="btn btn-sm btn-outline-primary w-100">
+                                    <i class="bi bi-arrow-right-circle"></i> Read More
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination Controls -->
+        {% if pagination and pagination.pages > 1 %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous Button -->
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                        {% if pagination.has_prev %}
+                            <a class="page-link" href="?page={{ pagination.prev_num }}">
+                                <i class="bi bi-chevron-left"></i> Previous
+                            </a>
+                        {% else %}
+                            <span class="page-link">
+                                <i class="bi bi-chevron-left"></i> Previous
+                            </span>
+                        {% endif %}
+                    </li>
+
+                    <!-- Page Numbers -->
+                    {% for page_num in pagination.iter_pages() %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- Next Button -->
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                        {% if pagination.has_next %}
+                            <a class="page-link" href="?page={{ pagination.next_num }}">
+                                Next <i class="bi bi-chevron-right"></i>
+                            </a>
+                        {% else %}
+                            <span class="page-link">
+                                Next <i class="bi bi-chevron-right"></i>
+                            </span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 5rem; color: #dee2e6;"></i>
+            <h3 class="mt-3 text-muted">No Posts Yet</h3>
+            <p class="text-muted">Be the first to create a post!</p>
+            {% if current_user.is_authenticated %}
+                <a href="/post/new" class="btn btn-primary mt-3">
+                    <i class="bi bi-plus-circle"></i> Create First Post
+                </a>
+            {% else %}
+                <a href="/login" class="btn btn-primary mt-3">
+                    <i class="bi bi-box-arrow-in-right"></i> Login to Create Posts
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}

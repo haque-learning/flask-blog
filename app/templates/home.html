@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Home - {{ name }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-modern">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <h1 class="hero-title">Write, Share & Connect</h1>
+                <p class="hero-subtitle">
+                    Join our community of writers and readers. Share your stories,
+                    discover new perspectives, and engage in meaningful conversations.
+                </p>
+                <div class="hero-buttons">
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('main.create_post') }}" class="btn btn-primary btn-hero">
+                            Start Writing <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                        <a href="{{ url_for('main.posts') }}" class="btn btn-outline-secondary btn-hero">
+                            Explore Posts
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-hero">
+                            Get Started <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                        <a href="{{ url_for('main.posts') }}" class="btn btn-outline-secondary btn-hero">
+                            Browse Articles
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-shape"></div>
+</section>
+
+<!-- Features Section -->
+<section class="features-modern">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Why Choose Our Platform?</h2>
+            <p class="section-subtitle">Everything you need to share your stories</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon bg-primary-gradient">
+                        <i class="bi bi-pencil-square"></i>
+                    </div>
+                    <h3>Easy Writing</h3>
+                    <p>Simple and intuitive interface to create beautiful posts in minutes.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon bg-success-gradient">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h3>Community</h3>
+                    <p>Connect with like-minded writers and engage in meaningful discussions.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon bg-warning-gradient">
+                        <i class="bi bi-heart-fill"></i>
+                    </div>
+                    <h3>Engagement</h3>
+                    <p>Like, comment, and interact with posts that resonate with you.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon bg-info-gradient">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h3>Secure</h3>
+                    <p>Your data is protected with industry‑standard security measures.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Posts Section -->
+<section class="recent-posts-modern">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h2 class="section-title mb-0">Recent Posts</h2>
+            <a href="{{ url_for('main.posts') }}" class="btn btn-outline-primary">
+                View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        {% if recent_posts %}
+            <div class="row g-4">
+                {% for post in recent_posts %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="post-card">
+                            <div class="post-header">
+                                <div class="d-flex align-items-center">
+                                    {% if post.author_user %}
+                                        <img src="{{ post.author_user.get_profile_image() }}" 
+                                             alt="{{ post.author_user.username }}"
+                                             class="post-author-img">
+                                        <div class="ms-2">
+                                            <div class="fw-bold">{{ post.author_user.username }}</div>
+                                            <small class="text-muted">{{ post.created_at.strftime('%b %d, %Y') }}</small>
+                                        </div>
+                                    {% else %}
+                                        <i class="bi bi-person-circle post-author-icon"></i>
+                                        <div class="ms-2">
+                                            <div class="fw-bold">{{ post.author }}</div>
+                                            <small class="text-muted">{{ post.created_at.strftime('%b %d, %Y') }}</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <h3 class="post-title">
+                                <a href="{{ url_for('main.view_post', post_id=post.id) }}" class="stretched-link">
+                                    {{ post.title }}
+                                </a>
+                            </h3>
+                            <p class="post-excerpt">
+                                {{ post.content[:120] }}{% if post.content|length > 120 %}...{% endif %}
+                            </p>
+                            <div class="post-footer">
+                                <div class="post-stats">
+                                    <span><i class="bi bi-heart-fill text-danger"></i> {{ post.get_like_count() }}</span>
+                                    <span class="ms-3"><i class="bi bi-chat-fill text-primary"></i> {{ post.get_comment_count() }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                <h4 class="mt-3 text-muted">No posts yet</h4>
+                <p class="text-muted">Be the first to share your story!</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-modern">
+    <div class="container">
+        <div class="row text-center g-4">
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_posts }}</div>
+                    <div class="stat-label">Articles</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_users }}</div>
+                    <div class="stat-label">Writers</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_comments }}</div>
+                    <div class="stat-label">Comments</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_likes }}</div>
+                    <div class="stat-label">Likes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="cta-modern">
+    <div class="container">
+        <div class="cta-card">
+            <div class="row align-items-center">
+                <div class="col-lg-8 text-center text-lg-start mb-3 mb-lg-0">
+                    <h2>Ready to Share Your Story?</h2>
+                    <p class="mb-0">Join our community of writers and start publishing today.</p>
+                </div>
+                <div class="col-lg-4 text-center text-lg-end">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-cta">
+                        <i class="bi bi-person-plus me-2"></i>Sign Up Free
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

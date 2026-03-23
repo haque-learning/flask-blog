@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Too Many Requests - Nazrul's Blog{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <h1 class="display-1">429</h1>
+    <h2>Too Many Requests</h2>
+    <p class="lead">You're going too fast! Please slow down.</p>
+    <p class="text-muted">
+        Our systems detected too many requests from your connection.
+        Please wait a moment and try again.
+    </p>
+    <a href="/" class="btn btn-primary mt-3">
+        <i class="bi bi-house"></i> Go Home
+    </a>
+</div>
+{% endblock %}
