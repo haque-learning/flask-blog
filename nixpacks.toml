@@ -1,14 +1,13 @@
 [phases.setup]
-nixPkgs = ["postgresql", "postgresql.lib"]
+nixPkgs = ["postgresql", "postgresql.lib", "python311"]
 
 [phases.install]
 cmds = [
+  "python3.11 -m venv .venv",
+  "source .venv/bin/activate",
   "pip install --upgrade pip",
   "pip install --no-cache-dir -r requirements.txt"
 ]
 
 [phases.start]
-cmd = "gunicorn run:app"
-
-[build.env]
-LD_LIBRARY_PATH = "/nix/store/*postgresql-*/lib"
+cmd = "./start.sh"
