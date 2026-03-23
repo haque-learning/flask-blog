@@ -3,11 +3,12 @@ nixPkgs = ["postgresql", "postgresql.lib", "python311"]
 
 [phases.install]
 cmds = [
-  "python3.11 -m venv .venv",
-  "source .venv/bin/activate",
-  "pip install --upgrade pip",
-  "pip install --no-cache-dir -r requirements.txt"
+  "python3.11 -m pip install --upgrade pip",
+  "python3.11 -m pip install --no-cache-dir -r requirements.txt"
 ]
 
 [phases.start]
-cmd = "./start.sh"
+cmd = "python3.11 -m gunicorn run:app"
+
+[build.env]
+LD_LIBRARY_PATH = "/nix/store/*postgresql-*/lib"
