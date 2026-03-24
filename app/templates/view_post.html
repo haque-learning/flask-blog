@@ -146,8 +146,8 @@
             <!-- Not logged in message -->
             <div class="alert alert-info mb-4">
                 <i class="bi bi-info-circle"></i> 
-                <a href="/login" class="alert-link">Login</a> or 
-                <a href="/register" class="alert-link">Register</a> to join the conversation!
+                <a href="{{ url_for('auth.login') }}" class="alert-link">Login</a> or 
+                <a href="{{ url_for('auth.register') }}" class="alert-link">Register</a> to join the conversation!
             </div>
         {% endif %}
 

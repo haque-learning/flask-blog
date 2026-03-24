@@ -1,6 +1,6 @@
 """Application factory and configuration."""
 import os
-from flask import Flask
+from flask import Flask, render_template
 from flask_talisman import Talisman
 from config import config
 
@@ -64,7 +64,23 @@ def create_app(config_name=None):
     app.register_blueprint(main_bp)
     app.register_blueprint(admin_bp)
     
-    # Error handlers
+    # Register error handlers
+    @app.errorhandler(404)
+    def not_found_error(error):
+        """Handle page not found errors."""
+        return render_template('errors/404.html'), 404
+    
+    @app.errorhandler(403)
+    def forbidden_error(error):
+        """Handle forbidden access errors."""
+        return render_template('errors/403.html'), 403
+    
+    @app.errorhandler(500)
+    def internal_error(error):
+        """Handle internal server errors."""
+        db.session.rollback()  # Rollback any failed database transactions
+        return render_template('errors/500.html'), 500
+    
     @app.errorhandler(429)
     def ratelimit_handler(e):
         """Handle rate limit exceeded errors."""

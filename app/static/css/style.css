@@ -1513,3 +1513,47 @@ html {
         justify-content: center;
     }
 }
+
+/* ==========================================
+   ERROR PAGES
+   ========================================== */
+
+.error-container {
+    padding: 40px 20px;
+}
+
+.error-icon {
+    animation: errorBounce 2s ease-in-out infinite;
+}
+
+@keyframes errorBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.min-vh-75 {
+    min-height: 75vh;
+}
+
+.error-container .btn {
+    transition: all 0.3s ease;
+}
+
+.error-container .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.error-container a:not(.btn) {
+    color: #667eea;
+    transition: color 0.3s ease;
+}
+
+.error-container a:not(.btn):hover {
+    color: #764ba2;
+    text-decoration: underline;
+}

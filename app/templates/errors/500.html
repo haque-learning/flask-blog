@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - 500{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center min-vh-75 align-items-center">
+        <div class="col-lg-6 text-center">
+            <div class="error-container">
+                <!-- Error Icon -->
+                <div class="error-icon mb-4">
+                    <i class="bi bi-exclamation-octagon-fill" style="font-size: 6rem; color: #dc3545;"></i>
+                </div>
+                
+                <!-- Error Code -->
+                <h1 class="display-1 fw-bold text-danger mb-3">500</h1>
+                
+                <!-- Error Message -->
+                <h2 class="h3 mb-3">Internal Server Error</h2>
+                <p class="lead text-muted mb-4">
+                    Something went wrong on our end. We're working to fix it!
+                </p>
+                
+                <!-- Action Buttons -->
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="{{ url_for('main.home') }}" class="btn btn-danger btn-lg">
+                        <i class="bi bi-house-door me-2"></i>Go Home
+                    </a>
+                    <button onclick="window.location.reload()" class="btn btn-outline-danger btn-lg">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Try Again
+                    </button>
+                </div>
+                
+                <!-- Support Info -->
+                <div class="mt-5">
+                    <div class="alert alert-light">
+                        <i class="bi bi-info-circle me-2"></i>
+                        If this problem persists, please try refreshing the page or come back later.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

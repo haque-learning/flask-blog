@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - 404{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center min-vh-75 align-items-center">
+        <div class="col-lg-6 text-center">
+            <div class="error-container">
+                <!-- Error Icon -->
+                <div class="error-icon mb-4">
+                    <i class="bi bi-exclamation-triangle-fill" style="font-size: 6rem; color: #ffc107;"></i>
+                </div>
+                
+                <!-- Error Code -->
+                <h1 class="display-1 fw-bold text-primary mb-3">404</h1>
+                
+                <!-- Error Message -->
+                <h2 class="h3 mb-3">Oops! Page Not Found</h2>
+                <p class="lead text-muted mb-4">
+                    The page you're looking for doesn't exist or has been moved.
+                </p>
+                
+                <!-- Action Buttons -->
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="{{ url_for('main.home') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-house-door me-2"></i>Go Home
+                    </a>
+                    <a href="{{ url_for('main.posts') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-newspaper me-2"></i>Browse Posts
+                    </a>
+                </div>
+                
+                <!-- Helpful Links -->
+                <div class="mt-5">
+                    <p class="text-muted small">Here are some helpful links:</p>
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <a href="{{ url_for('main.home') }}" class="text-decoration-none">Home</a>
+                        <span class="text-muted">·</span>
+                        <a href="{{ url_for('main.posts') }}" class="text-decoration-none">All Posts</a>
+                        <span class="text-muted">·</span>
+                        <a href="{{ url_for('main.search') }}" class="text-decoration-none">Search</a>
+                        {% if current_user.is_authenticated %}
+                            <span class="text-muted">·</span>
+                            <a href="{{ url_for('main.my_posts') }}" class="text-decoration-none">My Posts</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
